@@ -8,3 +8,12 @@ The Python Serial Reader acts as the hardware‑facing component of the system a
 * The system must read sensor data at a frequency of approximately 1 Hz (1sec).
 * The Serial Reader encapsulates each reading into a structured format (e.g., JSON‑ready dictionary or string).
 * The Serial Reader runs continuously without unexpected termination during testing.
+
+# Overview
+## Serial port configuration
+
+## Data parsing logic
+
+## Expected input/output format
+
+## Runtime behavior
