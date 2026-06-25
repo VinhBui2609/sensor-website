@@ -12,3 +12,12 @@ The WebSocket channel will be implemented on both ends:
 * The Python client must successfully transmit JSON‑formatted sensor data at a frequency of approximately 1 Hz.
 * The Node.js server broadcasts received messages to all connected GUI clients.
 * The communication channel remains active during continuous operation without unexpected disconnections.
+
+# Overview
+## Connection setup
+
+## Message format
+
+## Expected communication flow
+
+## Runtime behavior
