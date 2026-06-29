@@ -1,0 +1,26 @@
+{
+  "name": "sensor-website",
+  "version": "1.0.0",
+  "description": "A Node.js server responsible for hosting the web application and enabling external access for real‑time monitoring. The task includes installing the Node.js runtime environment, configuring an Express‑based HTTP server, and verifying that the server runs reliably on the local machine. Additionally, the story includes integrating ngrok to expose the local server to the public internet, enabling remote access for testing and demonstration purposes.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VinhBui2609/sensor-website.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VinhBui2609/sensor-website/issues"
+  },
+  "homepage": "https://github.com/VinhBui2609/sensor-website#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "serialport": "^13.0.0",
+    "ws": "^8.21.0"
+  }
+}
