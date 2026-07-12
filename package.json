@@ -1,0 +1,12 @@
+{
+  "name": "sensor-dashboard-mock",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frontend + mock WebSocket server for testing the sensor data stream GUI",
+  "scripts": {
+    "mock": "node mock-server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
