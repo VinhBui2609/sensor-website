@@ -18,7 +18,7 @@
 
 // --- Configuration -----------------------------------------------------
 // Note: Swap with ngrok URL when ready
-const WS_URL = "ws://localhost:8080";
+const WS_URL = "ws://localhost:3000";
 
 // --- DOM references ------------------------------------------------------
 const runBtn = document.getElementById("runBtn");
@@ -98,7 +98,6 @@ function connectAndStart() {
     state.xData = [];
     state.yData = [];
     initPlot();
-    ws.send(JSON.stringify({ type: "start" }));
   });
 
   ws.addEventListener("message", (event) => { // when message received is data
@@ -110,8 +109,8 @@ function connectAndStart() {
       return;
     }
 
-    if (msg.type === "data") {
-      appendPoint(msg.timestamp, msg.value);
+    if (msg.type === "sensor") {
+      appendPoint(msg.timestamp, msg.lux);
     } else if (msg.type === "error") {
       console.error("Server error:", msg.message);
       setStatus("error", "Server error");
@@ -134,7 +133,6 @@ function connectAndStart() {
 
 function stopStreaming() {
   if (state.ws && state.ws.readyState === WebSocket.OPEN) {
-    state.ws.send(JSON.stringify({ type: "stop" }));
     state.ws.close();
   }
   setStreamingUI(false);
