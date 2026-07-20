@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sensor Data Stream</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app__header">
+      <div class="app__title">
+        <span class="app__eyebrow">Live Telemetry</span>
+        <h1>Sensor Data Stream</h1>
+      </div>
+      <div class="status" id="status">
+        <span class="status__dot" id="statusDot"></span>
+        <span class="status__label" id="statusLabel">Disconnected</span>
+      </div>
+    </header>
+
+    <main class="app__main">
+      <section class="panel">
+        <div class="panel__controls">
+          <button id="runBtn" class="btn btn--primary">
+            <span class="btn__icon">&#9654;</span> Run Sensor Data
+          </button>
+          <button id="stopBtn" class="btn btn--danger" disabled>
+            <span class="btn__icon">&#9632;</span> Stop
+          </button>
+          <button id="downloadBtn" class="btn btn--ghost" disabled>
+            <span class="btn__icon">&#8595;</span> Download Graph
+          </button>
+        </div>
+
+        <div class="panel__graph">
+          <div id="plot"></div>
+        </div>
+
+        <p class="panel__hint" id="hint">
+          Click <strong>Run Sensor Data</strong> to start streaming.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <script src="home.js"></script>
+</body>
+</html>
