@@ -4,8 +4,10 @@
 Debug/
 Drivers/
 Middlewares/
+node_modules/
 
 # Configuration files
 *.launch
 *.debug
 *.ld
+
