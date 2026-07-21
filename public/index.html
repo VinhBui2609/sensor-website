@@ -33,8 +33,24 @@
           </button>
         </div>
 
+        <div class="reading">
+          <div class="reading__block">
+            <span class="reading__label">Lux</span>
+            <span class="reading__value" id="currentLux">&mdash;</span>
+          </div>
+          <div class="reading__block">
+            <span class="reading__label">Timestamp (UTC+7)</span>
+            <span class="reading__value reading__value--time" id="currentTime">&mdash;</span>
+          </div>
+        </div>
+
         <div class="panel__graph">
           <div id="plot"></div>
+        </div>
+
+        <div class="log">
+          <div class="log__header">Recent readings</div>
+          <div class="log__list" id="logList"></div>
         </div>
 
         <p class="panel__hint" id="hint">

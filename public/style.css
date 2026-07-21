@@ -160,6 +160,88 @@ html, body {
   padding: 8px;
 }
 
+.reading {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.reading__block {
+  flex: 1;
+  min-width: 180px;
+  background: var(--bg);
+  border: 1px solid var(--grid);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.reading__label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.reading__value {
+  display: block;
+  font-family: var(--mono);
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1.1;
+}
+
+.reading__value--time {
+  font-size: 18px;
+  color: var(--text);
+}
+
+.log {
+  margin-top: 16px;
+  background: var(--bg);
+  border: 1px solid var(--grid);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.log__header {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--grid);
+}
+
+.log__list {
+  max-height: 160px;
+  overflow-y: auto;
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.log__row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 14px;
+  border-bottom: 1px solid var(--grid);
+  color: var(--text-dim);
+}
+
+.log__row:last-child {
+  border-bottom: none;
+}
+
+.log__row .log__lux {
+  color: var(--text);
+  font-weight: 600;
+}
+
 #plot {
   width: 100%;
   height: 420px;

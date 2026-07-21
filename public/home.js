@@ -1,23 +1,32 @@
 /**
  * home.js — Sensor Data Stream client logic
  *
- * WIRE PROTOCOL (Assumption to create a working model first):
- *   Client -> Server:
- *     { type: "start" }                         // begin streaming
- *     { type: "stop"  }                          // stop streaming
+ * WIRE PROTOCOL (matches the current server.js):
  *
- *   Server -> Client:
- *     { type: "data", timestamp: <ms|iso>, value: <number> }
- *     { type: "error", message: <string> }       // optional, for surfacing server issues
+ *   Client -> Server:
+ *     (nothing — this client is listen-only)
+ *
+ *   Server -> Client (broadcast to ALL connected clients, not per-session):
+ *     { type: "sensor", lux: <number>, timestamp: <ISO string> }
+ *     { type: "error", message: <string> }
+ *
+ * IMPORTANT: the sensor stream is driven entirely by the Python serial
+ * reader, which connects and starts pushing readings on its own — it does
+ * not wait for any signal from the browser. server.js broadcasts every
+ * reading to every open socket, with no per-client start/stop control.
+ * "Run" here means "open a socket and start listening to whatever's
+ * already flowing." "Stop" means "close my own socket" — it has no effect
+ * on the sensor itself or on any other connected tab.
  *
  * Each browser tab that loads this page opens its own WebSocket connection
  * and owns its own `state` object + its own Plotly instance (#plot), so
- * multiple simultaneous users/tabs are naturally independent —> nothing
- * is shared across page loads.
+ * each tab renders its own independent graph — though note the underlying
+ * data stream itself is shared/broadcast, not per-tab.
  */
 
 // --- Configuration -----------------------------------------------------
-// Note: Swap with ngrok URL when ready
+// Matches server.js: http.createServer + WebSocket.Server on the same port.
+// Swap this for your groupmate's ngrok URL (wss://...) once that's live.
 const WS_URL = "ws://localhost:3000";
 
 // --- DOM references ------------------------------------------------------
@@ -29,6 +38,9 @@ const statusDot = document.getElementById("statusDot");
 const statusLabel = document.getElementById("statusLabel");
 const hint = document.getElementById("hint");
 const plotDiv = document.getElementById("plot");
+const currentLuxEl = document.getElementById("currentLux");
+const currentTimeEl = document.getElementById("currentTime");
+const logListEl = document.getElementById("logList");
 
 // --- Local state (per tab/session) ---------------------------------------
 const state = {
@@ -45,7 +57,7 @@ const plotLayout = {
   font: { color: "#e7eef0", family: "IBM Plex Mono, monospace", size: 12 },
   margin: { l: 50, r: 20, t: 20, b: 40 },
   xaxis: { title: "Time", gridcolor: "#1e2a2d", zeroline: false },
-  yaxis: { title: "Value", gridcolor: "#1e2a2d", zeroline: false },
+  yaxis: { title: "Lux", gridcolor: "#1e2a2d", zeroline: false },
   showlegend: false,
 };
 
@@ -90,7 +102,6 @@ function connectAndStart() {
   const ws = new WebSocket(WS_URL);
   state.ws = ws;
 
-  // Main structure to check for any message event on WS
   ws.addEventListener("open", () => {
     setStatus("live", "Streaming");
     setStreamingUI(true);
@@ -98,9 +109,12 @@ function connectAndStart() {
     state.xData = [];
     state.yData = [];
     initPlot();
+    currentLuxEl.textContent = "\u2014";
+    currentTimeEl.textContent = "\u2014";
+    logListEl.innerHTML = "";
   });
 
-  ws.addEventListener("message", (event) => { // when message received is data
+  ws.addEventListener("message", (event) => {
     let msg;
     try {
       msg = JSON.parse(event.data);
@@ -140,16 +154,49 @@ function stopStreaming() {
   downloadBtn.disabled = state.xData.length === 0;
 }
 
+// --- Timezone handling (UTC+7) ------------------------------------------
+const UTC7_PART_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  timeZone: "Asia/Ho_Chi_Minh",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false,
+});
+
+function getUTC7Parts(timestamp) {
+  const date = new Date(timestamp);
+  const parts = UTC7_PART_FORMATTER.formatToParts(date).reduce((acc, p) => {
+    acc[p.type] = p.value;
+    return acc;
+  }, {});
+  if (parts.hour === "24") parts.hour = "00";
+  return parts;
+}
+
+function partsToPlotlyISOString(parts) {
+  return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}.000Z`;
+}
+
+function formatUTC7Display(parts) {
+  return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}:${parts.second}`;
+}
+
 // --- Graph updates ------------------------------------------------------
 function appendPoint(timestamp, value) {
-  const x = timestamp !== undefined ? timestamp : new Date().toISOString();
+  const raw = timestamp !== undefined ? timestamp : new Date().toISOString();
+  const parts = getUTC7Parts(raw);
+  const x = partsToPlotlyISOString(parts);
+
   state.xData.push(x);
   state.yData.push(value);
 
   Plotly.extendTraces(plotDiv, { x: [[x]], y: [[value]] }, [0]);
 
   // Keep only the most recent N points visible to avoid the graph
-  // becoming unreadable during long streams
+  // becoming unreadable during long streams. Adjust as needed.
   const MAX_VISIBLE = 200;
   if (state.xData.length > MAX_VISIBLE) {
     const excess = state.xData.length - MAX_VISIBLE;
@@ -157,9 +204,29 @@ function appendPoint(timestamp, value) {
       "xaxis.range": [state.xData[excess], x],
     });
   }
+
+  updateReadingPanel(parts, value);
 }
 
-// --- Graph export (SVG now, other formats maybe later) ------------------
+function updateReadingPanel(parts, value) {
+  const formattedTime = formatUTC7Display(parts);
+
+  currentLuxEl.textContent = value.toFixed(2);
+  currentTimeEl.textContent = formattedTime;
+
+  const row = document.createElement("div");
+  row.className = "log__row";
+  row.innerHTML = `<span class="log__lux">${value.toFixed(2)} lux</span><span>${formattedTime}</span>`;
+  logListEl.prepend(row);
+
+  // Cap the log so it doesn't grow unbounded during a long stream.
+  const MAX_LOG_ROWS = 50;
+  while (logListEl.children.length > MAX_LOG_ROWS) {
+    logListEl.removeChild(logListEl.lastChild);
+  }
+}
+
+// --- Graph export (SVG, for later PGF/TikZ conversion) ------------------
 function downloadGraph() {
   Plotly.downloadImage(plotDiv, {
     format: "svg",
