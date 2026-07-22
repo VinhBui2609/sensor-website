@@ -28,9 +28,16 @@
           <button id="stopBtn" class="btn btn--danger" disabled>
             <span class="btn__icon">&#9632;</span> Stop
           </button>
-          <button id="downloadBtn" class="btn btn--ghost" disabled>
-            <span class="btn__icon">&#8595;</span> Download Graph
-          </button>
+          <div class="dropdown" id="downloadDropdown">
+            <button id="downloadBtn" class="btn btn--ghost" disabled>
+              <span class="btn__icon">&#8595;</span> Download Graph
+            </button>
+            <div class="dropdown__menu" id="downloadMenu">
+              <button class="dropdown__item" data-format="png">PNG image</button>
+              <button class="dropdown__item" data-format="svg">SVG</button>
+              <button class="dropdown__item" data-format="json">JSON (raw data)</button>
+            </div>
+          </div>
         </div>
 
         <div class="reading">
@@ -61,6 +68,6 @@
   </div>
 
   <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
-  <script type="module" src="home.js"></script>
+  <script type = "module" src="home.js"></script>
 </body>
 </html>

@@ -82,12 +82,82 @@ function updateReadingPanel(parts, value) {
   }
 }
 
-// --- Graph export (SVG, PNG, JSON) ------------------
-export function downloadGraph() {
-  Plotly.downloadImage(plotDiv, {
-    format: "svg",
-    filename: "sensor-graph",
-    width: 900,
-    height: 500,
+// --- Graph export (SVG / PNG / JSON) ------------------
+
+function buildExportLayout() {
+  return {
+    ...plotLayout,
+    paper_bgcolor: "#ffffff",
+    plot_bgcolor: "#ffffff",
+    font: { ...plotLayout.font, color: "#111111" },
+    xaxis: {
+      ...plotLayout.xaxis,
+      gridcolor: "#cccccc",
+      zerolinecolor: "#cccccc",
+      linecolor: "#111111",
+      tickfont: { color: "#111111" },
+    },
+    yaxis: {
+      ...plotLayout.yaxis,
+      gridcolor: "#cccccc",
+      zerolinecolor: "#cccccc",
+      linecolor: "#111111",
+      tickfont: { color: "#111111" },
+    },
+  };
+}
+
+async function downloadImageFormat(format) {
+  const hiddenDiv = document.createElement("div");
+  hiddenDiv.style.position = "fixed";
+  hiddenDiv.style.top = "0";
+  hiddenDiv.style.left = "-9999px";
+  hiddenDiv.style.width = "900px";
+  hiddenDiv.style.height = "500px";
+  document.body.appendChild(hiddenDiv);
+ 
+  try {
+    await Plotly.newPlot(hiddenDiv, plotDiv.data, buildExportLayout(), {
+      staticPlot: true,
+    });
+    await Plotly.downloadImage(hiddenDiv, {
+      format,
+      filename: "sensor-graph",
+      width: 900,
+      height: 500,
+    });
+  } finally {
+    Plotly.purge(hiddenDiv);
+    hiddenDiv.remove();
+  }
+}
+
+function downloadJSON() {
+  const exportObject = {
+    data: plotDiv.data,
+    layout: plotDiv.layout,
+  };
+  const blob = new Blob([JSON.stringify(exportObject, null, 2)], {
+    type: "application/json",
   });
+  triggerDownload(blob, "sensor-graph.json");
+}
+
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+export function downloadGraph(format) {
+  if (format === "json") {
+    downloadJSON();
+  } else {
+    downloadImageFormat(format);
+  }
 }

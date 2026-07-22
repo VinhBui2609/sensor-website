@@ -6,6 +6,10 @@ export const stopBtn = document.getElementById("stopBtn");
 
 export const downloadBtn = document.getElementById("downloadBtn");
 
+export const downloadMenu = document.getElementById("downloadMenu");
+
+export const downloadDropdown = document.getElementById("downloadDropdown");
+
 export const statusEl = document.getElementById("status");
 
 export const statusDot = document.getElementById("statusDot");
