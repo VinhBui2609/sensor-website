@@ -78,7 +78,7 @@ def main():
             lux = ser.readline()
             payload = into_json(lux)
 
-            if lux is not None:
+            if payload is not None:
                 json_output = json.dumps(payload)
                 ws.send(json_output)
 
