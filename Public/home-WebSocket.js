@@ -69,7 +69,7 @@ export function connectAndStart() {
     if (typeof lux === "number") {
       appendPoint(new Date(), lux);
     } else {
-      console.warn("Unhandled message type:", msg.type);
+      console.warn("Unhandled message type:");
     }
   });
 
