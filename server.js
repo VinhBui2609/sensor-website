@@ -21,67 +21,27 @@ wss.on("connection", (socket, request) => {
   console.log("WebSocket connected");
 
   socket.on("message", (data) => {
-    let payload;
+  let lux;
 
-    try {
-      payload = JSON.parse(data.toString());
-    } catch {
-      socket.send(JSON.stringify({
-        type: "error",
-        message: "Invalid JSON."
-      }));
-      return;
-    }
+  try {
+    lux = JSON.parse(data.toString());
+  } catch {
+    return;
+  }
 
-    switch (payload.type) {
-      case "sensor":
-        if (
-          !Number.isFinite(Number(payload.lux)) ||
-          Number(payload.lux) < 0
-        ) {
-          socket.send(JSON.stringify({
-            type: "error",
-            message: "Invalid lux value."
-          }));
-          return;
-        }
-    
-        const sensorMessage = JSON.stringify({
-          type: "sensor",
-          lux: Number(payload.lux),
-          timestamp: new Date().toISOString()
-        });
-    
-        console.log("Sensor:", sensorMessage);
-    
-        for (const client of wss.clients) {
-          if (client.readyState === WebSocket.OPEN) {
-            client.send(sensorMessage);
-          }
-        }
-    
-        break;
-    
-    
-      case "command":
-    
-        console.log("Command:", payload.command);
-    
-        // Later:
-        // send to Python
-        // send to STM32
-        // etc.
-    
-        break;
-    
-    
-      default:
-    
-        socket.send(JSON.stringify({
-          type: "error",
-          message: "Unknown message type."
-        }));
+  if (!Number.isFinite(Number(lux)) || Number(lux) < 0) {
+    return;
+  }
+
+  const sensorMessage = JSON.stringify(Number(lux));
+
+  console.log("Lux:", lux);
+
+  for (const client of wss.clients) {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(sensorMessage);
     }
+  }
   });
 
   socket.on("close", () => {

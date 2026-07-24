@@ -16,10 +16,6 @@ WS_URL = "ws://localhost:3000/"
 
 
 def connect_serial():
-    """
-    Open the STM32 Virtual COM Port.
-    Returns a Serial object.
-    """
     print(f"Connecting to {PORT}...")
 
     ser = serial.Serial(
@@ -36,35 +32,14 @@ def connect_serial():
 
 
 def into_json(raw_bytes):
-    """
-    Convert raw UART bytes into a Python dictionary.
-
-    Input:
-        b'123.45\\n'
-
-    Output:
-        {
-            "type": "sensor",
-            "lux": 123.45
-        }
-
-    Returns None if the packet is invalid.
-    """
     try:
         text = raw_bytes.decode("utf-8").strip()
 
         if not text:
             return None
 
-        # Directly cast to float since the hardware removed the "LUX:" prefix
         value = float(text)
-
-        payload = {
-            "type": "sensor",
-            "lux": value
-        }
-
-        return payload
+        return value
 
     except UnicodeDecodeError:
         print("WARNING: UTF-8 decoding failed.")
@@ -74,18 +49,6 @@ def into_json(raw_bytes):
         print(f"WARNING: Invalid numeric value received: '{text}'")
         return None
 
-
-def read_sensor(ser):
-    """
-    Read one UART packet.
-
-    """
-    raw_bytes = ser.readline()
-
-    if not raw_bytes:
-        return None
-
-    return into_json(raw_bytes)
 
 
 def open_websocket():
@@ -112,9 +75,10 @@ def main():
             if ws is None or not ws.connected:
                 ws = open_websocket()
 
-            payload = read_sensor(ser)
+            lux = ser.readline()
+            payload = into_json(lux)
 
-            if payload is not None:
+            if lux is not None:
                 json_output = json.dumps(payload)
                 ws.send(json_output)
 

@@ -57,19 +57,17 @@ export function connectAndStart() {
   });
 
   ws.addEventListener("message", (event) => {
-    let msg;
+    let lux;
+
     try {
-      msg = JSON.parse(event.data);
+      lux = JSON.parse(event.data);   // event.data is a JSON number, e.g. 123.45
     } catch (err) {
-      console.error("Received non-JSON message:", event.data);
+      console.error("Received invalid JSON:", event.data);
       return;
     }
 
-    if (msg.type === "sensor") {
-      appendPoint(msg.timestamp, msg.lux);
-    } else if (msg.type === "error") {
-      console.error("Server error:", msg.message);
-      setStatus("error", "Server error");
+    if (typeof lux === "number") {
+      appendPoint(new Date(), lux);
     } else {
       console.warn("Unhandled message type:", msg.type);
     }
